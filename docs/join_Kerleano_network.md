@@ -1,17 +1,17 @@
 # Join the network `kerleano`
 
-In this example we are using 2 `ubuntu` VMs to bootstrap the network `kerleano`
+We're using 2 `ubuntu` VMs to join the network `kerleano`
 
-**VM1: will be the sealer in the network**
+**VM1: will be sealer in the network**
 - VM1 requirements: 
-    * os: ubuntu
+    * os: Ubuntu 20.04.4 LTS
     * ram: 2Gb
     * cpu: ??
     * tcp/udp port 30303: default geth node (can override by `--port` when starting the node)
 
 **VM2 : will be a client node and expose the rpc and ws endpoints of the network**
 - VM1 requirements: 
-    * os: ubuntu
+    * os: Ubuntu 20.04.4 LTS
     * ram: 2Gb
     * cpu: ??
     * tcp/udp port 30303: default geth port (can override by `--port` when starting the node)
@@ -36,21 +36,24 @@ export GITLAB_USER=your_gitlab_user
 export GITLAB_ACCESS_TOKEN=your_access_token_with_read_api
 ```
 
-**3) download geth binary, give exec right and move to /usr/bin/**
+**3) download geth binary and give exec right**
 
 ```sh
 # download the latest released stable version (in this example we go for `latest`)
 export geth_version=latest && \
-    sudo curl -f -u "${GITLAB_USER}:${GITLAB_ACCESS_TOKEN}" -o "geth-pocr" \
+    mkdir -p ~/bin && \
+    echo "export PATH=$PATH:~/bin" >> ~/.bashrc && \
+    source ~/.bashrc && \
+    curl -f -u "${GITLAB_USER}:${GITLAB_ACCESS_TOKEN}" -o "geth-pocr" \
     https://gitlab.com/api/v4/projects/34464473/packages/generic/geth/${geth_version}/geth && \
-    sudo chmod +x geth-pocr && sudo mv geth-pocr /usr/bin/geth
+    chmod +x geth-pocr && mv geth-pocr ~/bin/geth
 ```
 
 **4) download kerleano.json to `~/kerleano.json`**
 
 ```sh
 export kerleano_version=latest && \
-    sudo curl -f -u "${GITLAB_USER}:${GITLAB_ACCESS_TOKEN}" -o ~/kerleano.json \
+    curl -f -u "${GITLAB_USER}:${GITLAB_ACCESS_TOKEN}" -o ~/kerleano.json \
     https://gitlab.com/api/v4/projects/34381428/packages/generic/genesis/${kerleano_version}/kerleano.json
 ```
 
@@ -58,10 +61,14 @@ export kerleano_version=latest && \
 **5) init node with kerleano.json**
 
 ```sh
-geth init --datadir ~/.ethereum/ ~/kerleano.json
+
+# directory where chaindata will be written, use external mount instead of ~/.ethereum/
+export DATADIR=~/.ethereum/
+
+geth init --datadir $DATADIR ~/kerleano.json
 ```
 
-Make sure you see `Successfully wrote genesis state` in the log of the `geth init`command, otherwise you may have some data already written that should be deleted (default datadir `rm -rf ~/.ethereum/`)
+Make sure you see `Successfully wrote genesis state` in the log of the `geth init`command, otherwise you may have some data already written that should be deleted (rm datadir `rm -rf $DATADIR`)
 
 
 **6) Generate sealer account**
@@ -85,8 +92,11 @@ Get one or more `enodes` from here https://gitlab.com/saturnproject/externalgrp/
 will be used with `--bootnodes` option when starting the node
 
 ```sh
-# export one or more enodes in the variable BOOTNODE, delimiter is space`
-export BOOTNODE="<get_enodes_space_separated>"
+# write one or more enodes to a file 
+echo "<enode_url_1>" >> ~/.enodes
+echo "<enode_url_xx>" >> ~/.enodes
+# export one or more enodes in the variable BOOTNODE, delimiter is comma`
+export BOOTNODE=$(readarray -t ARRAY < ~/.enodes; IFS=','; echo "${ARRAY[*]}")
 ```
 
 **8) Start the sealer of the network**
@@ -96,39 +106,41 @@ export BOOTNODE="<get_enodes_space_separated>"
 export PUBLIC_IP=$(curl -s ifconfig.me/ip)
 
 # start geth node 
-nohup geth --networkid 1804 \
-    --datadir ~/.ethereum/ \
+echo 'nohup geth --networkid 1804 \
+    --datadir $DATADIR \
     --bootnodes $BOOTNODE \
     --syncmode full \
     --mine --miner.gasprice 1000000000 \
     --miner.etherbase $address --unlock $address \
-    --password ~/.passphrase --allow-insecure-unlock --keystore ~/.ethereum/keystore/ \
+    --password ~/.passphrase --allow-insecure-unlock --keystore $DATADIR/keystore/ \
     --nat extip:$PUBLIC_IP \
-    2>&1 1>>/tmp/eth.log &
+    2>&1 1>>/tmp/eth.log &' > ~/start_sealer_node.sh && \
+    chmod +x ~/start_sealer_node.sh && \
+    ~/start_sealer_node.sh
 ```
 
 **9) Publish the `enode` of the sealer node**
 
 ```sh
 # Get the enode of the sealer
-geth attach --exec admin.nodeInfo.enode
+geth attach --datadir $DATADIR --exec admin.nodeInfo.enode
 ```
 
 then add the `enode` to this wiki page https://gitlab.com/saturnproject/externalgrp/global_qna/-/wikis/Networks-infos
 
 **10) Authorize the node to start sealing**
 
-At this stage the node is connected to the network but not able to seal blocks, submit your public address with your identity here https://gitlab.com/saturnproject/externalgrp/global_qna/-/wikis/Identities and wait for other nodes to authorize the node.
+At this stage the node is connected to the network but not able to seal blocks, create an issue with your public address and your identity and your motivation ot join the network here https://gitlab.com/saturnproject/externalgrp/pocr/kerleano/-/issues and wait for other nodes to authorize yours.
 
 For the `clique`consensus you need more then 50% voters to join the network as sealer,
 
-If your node is already sealer in the network, then you can vote to allow for new joiners
+If your node is already sealer in the network, then you can vote to allow for new joiners,
 once more then 50% of the nodes in the network do the commands bellow, the node will start sealing blocks
 ```sh
 # ssh to the sealer node
 ssh user@sealer_node
 # attach a console to the sealer node
-geth attach --datadir ~/.ethereum/
+geth attach --datadir $DATADIR
 
 # vote for a wallet to join the network
 clique.propose("public_address_want_to_allow", true)
@@ -147,8 +159,11 @@ Get one or more `enodes` from here https://gitlab.com/saturnproject/externalgrp/
 will be used with `--bootnodes` option when starting the node
 
 ```sh
-# export one or more enodes in the variable BOOTNODE, delimiter is space`
-export BOOTNODE="<get_enodes_space_separated>"
+# write one or more enodes to a file 
+echo "<enode_url_1>" >> ~/.enodes
+echo "<enode_url_xx>" >> ~/.enodes
+# export one or more enodes in the variable BOOTNODE, delimiter is comma`
+export BOOTNODE=$(readarray -t ARRAY < ~/.enodes; IFS=','; echo "${ARRAY[*]}")
 ```
 
 **3) Start client node**
@@ -158,9 +173,9 @@ export BOOTNODE="<get_enodes_space_separated>"
 export PUBLIC_IP=$(curl -s ifconfig.me/ip)
 
 # start geth node 
-nohup geth --networkid 1804 \
+echo 'nohup geth --networkid 1804 \
     --bootnodes $BOOTNODE \
-    --datadir ~/.ethereum/ \
+    --datadir $DATADIR \
     --http --http.addr "0.0.0.0" --http.port 8545 \
     --http.api "eth,web3,net,admin,debug,personal" --http.corsdomain "*" \
     --ws --ws.addr "0.0.0.0" --ws.port 8546 \
@@ -168,14 +183,16 @@ nohup geth --networkid 1804 \
     --syncmode full \
     --nat extip:$PUBLIC_IP \
     --miner.etherbase $address \
-    2>&1 1>>/tmp/eth.log &
+    2>&1 1>>/tmp/eth.log &' > ~/start_client_node.sh && \
+    chmod +x ~/start_client_node.sh && \
+    ~/start_client_node.sh
 ```
 
 **4) Publish the `enode` of the client node**
 
 ```sh
 # Get the enode of the client
-geth attach --exec admin.nodeInfo.enode
+geth attach --datadir $DATADIR --exec admin.nodeInfo.enode
 ```
 then add the `enode` to `enodes` list in this wiki page https://gitlab.com/saturnproject/externalgrp/global_qna/-/wikis/Networks-infos
 
