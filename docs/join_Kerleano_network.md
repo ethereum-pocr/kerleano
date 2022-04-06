@@ -71,7 +71,20 @@ geth init --datadir $DATADIR ~/kerleano.json
 Make sure you see `Successfully wrote genesis state` in the log of the `geth init`command, otherwise you may have some data already written that should be deleted (rm datadir `rm -rf $DATADIR`)
 
 
-**6) Generate sealer account**
+**6) Get `kerleano` network `enodes`**
+
+Get one or more `enodes` from here https://gitlab.com/saturnproject/externalgrp/global_qna/-/wikis/Networks-infos and export in env variable BOOTNODE.
+will be used with `--bootnodes` option when starting the node
+
+```sh
+# write one or more enodes to a file 
+echo "<enode_url_1>" >> ~/.enodes
+echo "<enode_url_xx>" >> ~/.enodes
+# export one or more enodes in the variable BOOTNODE, delimiter is comma`
+# export BOOTNODE=$(readarray -t ARRAY < ~/.enodes; IFS=','; echo "${ARRAY[*]}")
+```
+
+**7) Generate sealer account**
 
 Generate an account and a passphrase to unlock it
 ```sh
@@ -84,19 +97,6 @@ export address=public_address_of_generated_account
 #write the passphrase to a file
 echo "replace_with_your_passphrase" > ~/.passphrase
 
-```
-
-**7) Get `kerleano` network `enodes`**
-
-Get one or more `enodes` from here https://gitlab.com/saturnproject/externalgrp/global_qna/-/wikis/Networks-infos and export in env variable BOOTNODE.
-will be used with `--bootnodes` option when starting the node
-
-```sh
-# write one or more enodes to a file 
-echo "<enode_url_1>" >> ~/.enodes
-echo "<enode_url_xx>" >> ~/.enodes
-# export one or more enodes in the variable BOOTNODE, delimiter is comma`
-# export BOOTNODE=$(readarray -t ARRAY < ~/.enodes; IFS=','; echo "${ARRAY[*]}")
 ```
 
 **8) Start the sealer of the network**
@@ -121,6 +121,8 @@ echo 'nohup geth --networkid 1804 \
     2>&1 1>>/tmp/eth.log &' >> ~/start_sealer_node.sh 
 
 chmod +x ~/start_sealer_node.sh
+
+
 # run the node
 
 ~/start_sealer_node.sh
@@ -158,45 +160,38 @@ clique.propose("public_address_want_to_allow", true)
 
 **1) configure VM2**
 
-Repeat steps from 1) to 5) used for first sealer node 
+Repeat steps from 1) to 6) used for first sealer node 
 your client node should be init with the same genesis `kerleano.json`
 
-**2) Get `kerleano` network `enodes`**
 
-Get one or more `enodes` from here https://gitlab.com/saturnproject/externalgrp/global_qna/-/wikis/Networks-infos and export in env variable BOOTNODE.
-will be used with `--bootnodes` option when starting the node
-
-```sh
-# write one or more enodes to a file 
-echo "<enode_url_1>" >> ~/.enodes
-echo "<enode_url_xx>" >> ~/.enodes
-# export one or more enodes in the variable BOOTNODE, delimiter is comma`
-export BOOTNODE=$(readarray -t ARRAY < ~/.enodes; IFS=','; echo "${ARRAY[*]}")
-```
-
-**3) Start client node**
+**2) Start client node**
 
 ```sh
 # get public ip address
 export PUBLIC_IP=$(curl -s ifconfig.me/ip)
 
-# start geth node 
+# create the start script
+echo 'BOOTNODE=$(readarray -t ARRAY < ~/.enodes; IFS=','; echo "${ARRAY[*]}")' > ~/start_client_node.sh
+echo 'DATADIR=~/.ethereum/' >> ~/start_client_node.sh
+echo "PUBLIC_IP=$(curl -s ifconfig.me/ip)" >> ~/start_client_node.sh
 echo 'nohup geth --networkid 1804 \
-    --bootnodes $BOOTNODE \
     --datadir $DATADIR \
-    --http --http.addr "0.0.0.0" --http.port 8545 \
-    --http.api "eth,web3,net,admin,debug,personal" --http.corsdomain "*" \
-    --ws --ws.addr "0.0.0.0" --ws.port 8546 \
-    --ws.api "eth,web3,net,admin,debug,personal" --ws.origins "*" \
+    --bootnodes $BOOTNODE \
     --syncmode full \
+    --http --http.addr=0.0.0.0 --http.port=8545 --http.api=web3,eth,net --http.corsdomain=* --http.vhosts=* \
+    --ws --ws.addr=0.0.0.0 --ws.port=8546 --ws.api=web3,eth,net --ws.origins=* \
     --nat extip:$PUBLIC_IP \
-    --miner.etherbase $address \
-    2>&1 1>>/tmp/eth.log &' > ~/start_client_node.sh && \
-    chmod +x ~/start_client_node.sh && \
-    ~/start_client_node.sh
-```
+    2>&1 1>>/tmp/eth.log &' >> ~/start_client_node.sh 
 
-**4) Publish the `enode` of the client node**
+chmod +x ~/start_client_node.sh
+
+
+# run the node
+
+~/start_client_node.sh
+````
+
+**3) Publish the `enode` of the client node**
 
 ```sh
 # Get the enode of the client
