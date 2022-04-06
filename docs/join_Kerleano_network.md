@@ -96,7 +96,7 @@ will be used with `--bootnodes` option when starting the node
 echo "<enode_url_1>" >> ~/.enodes
 echo "<enode_url_xx>" >> ~/.enodes
 # export one or more enodes in the variable BOOTNODE, delimiter is comma`
-export BOOTNODE=$(readarray -t ARRAY < ~/.enodes; IFS=','; echo "${ARRAY[*]}")
+# export BOOTNODE=$(readarray -t ARRAY < ~/.enodes; IFS=','; echo "${ARRAY[*]}")
 ```
 
 **8) Start the sealer of the network**
@@ -105,7 +105,11 @@ export BOOTNODE=$(readarray -t ARRAY < ~/.enodes; IFS=','; echo "${ARRAY[*]}")
 # get public ip address
 export PUBLIC_IP=$(curl -s ifconfig.me/ip)
 
-# start geth node 
+# create the start script
+echo 'BOOTNODE=$(readarray -t ARRAY < ~/.enodes; IFS=','; echo "${ARRAY[*]}")' > ~/start_sealer_node.sh
+echo 'DATADIR=~/.ethereum/' >> ~/start_sealer_node.sh
+echo "address=$address" >> ~/start_sealer_node.sh
+echo "PUBLIC_IP=$(curl -s ifconfig.me/ip)" >> ~/start_sealer_node.sh
 echo 'nohup geth --networkid 1804 \
     --datadir $DATADIR \
     --bootnodes $BOOTNODE \
@@ -114,10 +118,14 @@ echo 'nohup geth --networkid 1804 \
     --miner.etherbase $address --unlock $address \
     --password ~/.passphrase --allow-insecure-unlock --keystore $DATADIR/keystore/ \
     --nat extip:$PUBLIC_IP \
-    2>&1 1>>/tmp/eth.log &' > ~/start_sealer_node.sh && \
-    chmod +x ~/start_sealer_node.sh && \
-    ~/start_sealer_node.sh
+    2>&1 1>>/tmp/eth.log &' >> ~/start_sealer_node.sh 
+
+chmod +x ~/start_sealer_node.sh
+# run the node
+
+~/start_sealer_node.sh
 ```
+
 
 **9) Publish the `enode` of the sealer node**
 
