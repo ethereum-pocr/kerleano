@@ -61,32 +61,21 @@ export kerleano_version=latest && \
 **5) init node with kerleano.json**
 
 ```sh
-
+# create the keystore folder out of the data folder
+mkdir ~/.keystore
 # directory where chaindata will be written, use external mount instead of ~/.ethereum/
 export DATADIR=~/.ethereum/
 
 geth init --datadir $DATADIR ~/kerleano.json
+
+# move the nodekey outside of the data folder to keep the same node identity after a cleanup
+mv $DATADIR/geth/nodekey ~/.keystore/nodekey
 ```
 
 Make sure you see `Successfully wrote genesis state` in the log of the `geth init`command, otherwise you may have some data already written that should be deleted (rm datadir `rm -rf $DATADIR`)
 
 
-**6) Generate sealer account**
-
-Generate an account and a passphrase to unlock it
-```sh
-# generate the account, will generate a public key and keystore in ~/.ethereum/keystore/
-geth account new
-
-# export the Public address of the key (use)
-export address=public_address_of_generated_account
-
-#write the passphrase to a file
-echo "replace_with_your_passphrase" > ~/.passphrase
-
-```
-
-**7) Get `kerleano` network `enodes`**
+**6) Get `kerleano` network `enodes`**
 
 Get one or more `enodes` from here https://gitlab.com/saturnproject/externalgrp/global_qna/-/wikis/Networks-infos and export in env variable BOOTNODE.
 will be used with `--bootnodes` option when starting the node
@@ -96,7 +85,22 @@ will be used with `--bootnodes` option when starting the node
 echo "<enode_url_1>" >> ~/.enodes
 echo "<enode_url_xx>" >> ~/.enodes
 # export one or more enodes in the variable BOOTNODE, delimiter is comma`
-export BOOTNODE=$(readarray -t ARRAY < ~/.enodes; IFS=','; echo "${ARRAY[*]}")
+# export BOOTNODE=$(readarray -t ARRAY < ~/.enodes; IFS=','; echo "${ARRAY[*]}")
+```
+
+**7) Generate sealer account**
+
+Generate an account and a passphrase to unlock it
+```sh
+# generate the account, will generate a public key and keystore in ~/.ethereum/keystore/
+geth account new --keystore ~/.keystore
+
+# export the Public address of the key (use)
+export address=public_address_of_generated_account
+
+#write the passphrase to a file
+echo "replace_with_your_passphrase" > ~/.passphrase
+
 ```
 
 **8) Start the sealer of the network**
@@ -105,19 +109,32 @@ export BOOTNODE=$(readarray -t ARRAY < ~/.enodes; IFS=','; echo "${ARRAY[*]}")
 # get public ip address
 export PUBLIC_IP=$(curl -s ifconfig.me/ip)
 
-# start geth node 
+# create the start script
+echo 'BOOTNODE=$(readarray -t ARRAY < ~/.enodes; IFS=','; echo "${ARRAY[*]}")' > ~/start_sealer_node.sh
+echo 'DATADIR=~/.ethereum/' >> ~/start_sealer_node.sh
+echo 'KEYSTORE=~/.keystore/' >> ~/start_sealer_node.sh
+echo 'NODEKEY=$KEYSTORE/nodekey' >> ~/start_sealer_node.sh
+echo "address=$address" >> ~/start_sealer_node.sh
+echo "PUBLIC_IP=$(curl -s ifconfig.me/ip)" >> ~/start_sealer_node.sh
 echo 'nohup geth --networkid 1804 \
     --datadir $DATADIR \
     --bootnodes $BOOTNODE \
+    --nodekey $NODEKEY \
     --syncmode full \
     --mine --miner.gasprice 1000000000 \
     --miner.etherbase $address --unlock $address \
-    --password ~/.passphrase --allow-insecure-unlock --keystore $DATADIR/keystore/ \
+    --password ~/.passphrase --allow-insecure-unlock --keystore $KEYSTORE \
     --nat extip:$PUBLIC_IP \
-    2>&1 1>>/tmp/eth.log &' > ~/start_sealer_node.sh && \
-    chmod +x ~/start_sealer_node.sh && \
-    ~/start_sealer_node.sh
+    2>&1 1>>/tmp/eth.log &' >> ~/start_sealer_node.sh 
+
+chmod +x ~/start_sealer_node.sh
+
+
+# run the node
+
+~/start_sealer_node.sh
 ```
+
 
 **9) Publish the `enode` of the sealer node**
 
@@ -150,45 +167,40 @@ clique.propose("public_address_want_to_allow", true)
 
 **1) configure VM2**
 
-Repeat steps from 1) to 5) used for first sealer node 
+Repeat steps from 1) to 6) used for first sealer node 
 your client node should be init with the same genesis `kerleano.json`
 
-**2) Get `kerleano` network `enodes`**
 
-Get one or more `enodes` from here https://gitlab.com/saturnproject/externalgrp/global_qna/-/wikis/Networks-infos and export in env variable BOOTNODE.
-will be used with `--bootnodes` option when starting the node
-
-```sh
-# write one or more enodes to a file 
-echo "<enode_url_1>" >> ~/.enodes
-echo "<enode_url_xx>" >> ~/.enodes
-# export one or more enodes in the variable BOOTNODE, delimiter is comma`
-export BOOTNODE=$(readarray -t ARRAY < ~/.enodes; IFS=','; echo "${ARRAY[*]}")
-```
-
-**3) Start client node**
+**2) Start client node**
 
 ```sh
 # get public ip address
 export PUBLIC_IP=$(curl -s ifconfig.me/ip)
 
-# start geth node 
+# create the start script
+echo 'BOOTNODE=$(readarray -t ARRAY < ~/.enodes; IFS=','; echo "${ARRAY[*]}")' > ~/start_client_node.sh
+echo 'DATADIR=~/.ethereum/' >> ~/start_client_node.sh
+echo 'NODEKEY=~/.keystore/nodekey' >> ~/start_client_node.sh
+echo "PUBLIC_IP=$(curl -s ifconfig.me/ip)" >> ~/start_client_node.sh
 echo 'nohup geth --networkid 1804 \
-    --bootnodes $BOOTNODE \
     --datadir $DATADIR \
-    --http --http.addr "0.0.0.0" --http.port 8545 \
-    --http.api "eth,web3,net,admin,debug,personal" --http.corsdomain "*" \
-    --ws --ws.addr "0.0.0.0" --ws.port 8546 \
-    --ws.api "eth,web3,net,admin,debug,personal" --ws.origins "*" \
+    --nodekey $NODEKEY \
+    --bootnodes $BOOTNODE \
     --syncmode full \
+    --http --http.addr=0.0.0.0 --http.port=8545 --http.api=web3,eth,net --http.corsdomain=* --http.vhosts=* \
+    --ws --ws.addr=0.0.0.0 --ws.port=8546 --ws.api=web3,eth,net --ws.origins=* \
     --nat extip:$PUBLIC_IP \
-    --miner.etherbase $address \
-    2>&1 1>>/tmp/eth.log &' > ~/start_client_node.sh && \
-    chmod +x ~/start_client_node.sh && \
-    ~/start_client_node.sh
-```
+    2>&1 1>>/tmp/eth.log &' >> ~/start_client_node.sh 
 
-**4) Publish the `enode` of the client node**
+chmod +x ~/start_client_node.sh
+
+
+# run the node
+
+~/start_client_node.sh
+````
+
+**3) Publish the `enode` of the client node**
 
 ```sh
 # Get the enode of the client
