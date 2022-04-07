@@ -61,11 +61,15 @@ export kerleano_version=latest && \
 **5) init node with kerleano.json**
 
 ```sh
-
+# create the keystore folder out of the data folder
+mkdir ~/.keystore
 # directory where chaindata will be written, use external mount instead of ~/.ethereum/
 export DATADIR=~/.ethereum/
 
 geth init --datadir $DATADIR ~/kerleano.json
+
+# move the nodekey outside of the data folder to keep the same node identity after a cleanup
+mv $DATADIR/geth/nodekey ~/.keystore/nodekey
 ```
 
 Make sure you see `Successfully wrote genesis state` in the log of the `geth init`command, otherwise you may have some data already written that should be deleted (rm datadir `rm -rf $DATADIR`)
@@ -89,7 +93,7 @@ echo "<enode_url_xx>" >> ~/.enodes
 Generate an account and a passphrase to unlock it
 ```sh
 # generate the account, will generate a public key and keystore in ~/.ethereum/keystore/
-geth account new
+geth account new --keystore ~/.keystore
 
 # export the Public address of the key (use)
 export address=public_address_of_generated_account
@@ -108,15 +112,18 @@ export PUBLIC_IP=$(curl -s ifconfig.me/ip)
 # create the start script
 echo 'BOOTNODE=$(readarray -t ARRAY < ~/.enodes; IFS=','; echo "${ARRAY[*]}")' > ~/start_sealer_node.sh
 echo 'DATADIR=~/.ethereum/' >> ~/start_sealer_node.sh
+echo 'KEYSTORE=~/.keystore/' >> ~/start_sealer_node.sh
+echo 'NODEKEY=$KEYSTORE/nodekey' >> ~/start_sealer_node.sh
 echo "address=$address" >> ~/start_sealer_node.sh
 echo "PUBLIC_IP=$(curl -s ifconfig.me/ip)" >> ~/start_sealer_node.sh
 echo 'nohup geth --networkid 1804 \
     --datadir $DATADIR \
     --bootnodes $BOOTNODE \
+    --nodekey $NODEKEY \
     --syncmode full \
     --mine --miner.gasprice 1000000000 \
     --miner.etherbase $address --unlock $address \
-    --password ~/.passphrase --allow-insecure-unlock --keystore $DATADIR/keystore/ \
+    --password ~/.passphrase --allow-insecure-unlock --keystore $KEYSTORE \
     --nat extip:$PUBLIC_IP \
     2>&1 1>>/tmp/eth.log &' >> ~/start_sealer_node.sh 
 
@@ -173,9 +180,11 @@ export PUBLIC_IP=$(curl -s ifconfig.me/ip)
 # create the start script
 echo 'BOOTNODE=$(readarray -t ARRAY < ~/.enodes; IFS=','; echo "${ARRAY[*]}")' > ~/start_client_node.sh
 echo 'DATADIR=~/.ethereum/' >> ~/start_client_node.sh
+echo 'NODEKEY=~/.keystore/nodekey' >> ~/start_client_node.sh
 echo "PUBLIC_IP=$(curl -s ifconfig.me/ip)" >> ~/start_client_node.sh
 echo 'nohup geth --networkid 1804 \
     --datadir $DATADIR \
+    --nodekey $NODEKEY \
     --bootnodes $BOOTNODE \
     --syncmode full \
     --http --http.addr=0.0.0.0 --http.port=8545 --http.api=web3,eth,net --http.corsdomain=* --http.vhosts=* \
