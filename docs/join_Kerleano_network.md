@@ -212,7 +212,9 @@ Client node expose http at port `8545` (by the option `--http.port 8545`) and we
 So update in the same wiki page add in `rpc`list with `http://$PUBLIC_IP:8545/` and websockets list with `ws://$PUBLIC_IP:8546/`
 
 
+# Assign a name to your node (optional)
 
+you can simply edit the startup scripts `start_sealer_node.sh` and `start_client_node.sh` to add the option `--miner.extradata "The name of your node"` and give your node the name of your choice
 
 
 
