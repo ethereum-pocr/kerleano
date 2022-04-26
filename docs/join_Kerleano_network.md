@@ -5,15 +5,15 @@ We're using 2 `ubuntu` VMs to join the network `kerleano`
 **VM1: will be sealer in the network**
 - VM1 requirements: 
     * os: Ubuntu 20.04.4 LTS
-    * ram: 2Gb
-    * cpu: ??
+    * ram: 2Gb min
+    * cpu: 1 min
     * tcp/udp port 30303: default geth node (can override by `--port` when starting the node)
 
 **VM2 : will be a client node and expose the rpc and ws endpoints of the network**
 - VM1 requirements: 
     * os: Ubuntu 20.04.4 LTS
-    * ram: 2Gb
-    * cpu: ??
+    * ram: 2Gb min
+    * cpu: 1 min
     * tcp/udp port 30303: default geth port (can override by `--port` when starting the node)
     * port 8545: default rpc port (can override by `--http.port` when starting the node)
     * port 8546: default websocket port (can override by `--ws.port` when starting the node)
@@ -212,7 +212,9 @@ Client node expose http at port `8545` (by the option `--http.port 8545`) and we
 So update in the same wiki page add in `rpc`list with `http://$PUBLIC_IP:8545/` and websockets list with `ws://$PUBLIC_IP:8546/`
 
 
+# Assign a name to your node (optional)
 
+you can simply edit the startup scripts `start_sealer_node.sh` and `start_client_node.sh` to add the option `--miner.extradata "The name of your node"` and give your node the name of your choice
 
 
 
