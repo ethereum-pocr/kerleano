@@ -6,7 +6,7 @@
       Use the Issues list also to follow instruction from the development team in case of reset of the network.   
       **So subscribe to the issues as you need to get notified when a node need your accaptance or when the testnet needs to be reset.**
 
-  *  Use **[Network infos](https://gitlab.com/saturnproject/externalgrp/global_qna/-/wikis/Networks-infos)** to get `enodes` url, `rpc`and `websocket` endpoints to join and interact with the network
+  *  Use **[Network infos](./nodes-infos.md)** to get `enodes` url, `rpc`and `websocket` endpoints to join and interact with the network
 
 # Nodes topology
 
