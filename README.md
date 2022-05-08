@@ -2,7 +2,7 @@
 
 # Network infos
 
-  *  Use **[Issues](https://gitlab.com/saturnproject/externalgrp/pocr/kerleano/-/issues)** to submit a request to joint kerleano network or read the existing requests.   
+  *  Use **[Issues](https://github.com/ethereum-pocr/kerleano/issues)** to submit a request to joint kerleano network or read the existing requests.   
       Use the Issues list also to follow instruction from the development team in case of reset of the network.   
       **So subscribe to the issues as you need to get notified when a node need your accaptance or when the testnet needs to be reset.**
 
@@ -92,12 +92,13 @@ As we're still at dev stage, the network may require to be reset, so all the nod
 ```sh
 rm -rf $DATADIR
 ```
-* If the genesis `kerleano.json` has changed, download the same version used by other nodes in the network (at this stage we're using `kerleano_version=v1.1`)
+* If the genesis `kerleano.json` has changed, download the same version used by other nodes in the network (at this stage we're using `kerleano_version=v1.0`)
 
 ```sh
-export kerleano_version=v1.1 && \
-    curl -f -u "${GITLAB_USER}:${GITLAB_ACCESS_TOKEN}" -o ~/kerleano.json \
-    https://gitlab.com/api/v4/projects/34381428/packages/generic/genesis/${kerleano_version}/kerleano.json
+export kerleano_version=v1.0 && \
+  curl -f -L -o ~/kerleano.json \
+    https://github.com/ethereum-pocr/ethereum-pocr.github.io/releases/download/$kerleano_version/kerleano.json
+
 ```
 
 * Init the geth with `kerleano.json`
@@ -121,7 +122,7 @@ geth init --datadir $DATADIR ~/kerleano.json
 * Genesis file `kerleano.json` must be identical to the one used by the nodes in the network
 * **Attention!!** The network will stuck if `50%` of the sealers are down, 
 To be able to recover the network, those sealers must rejoin the network with same authorized `addresses`, So the  `private keys` and their `passwords` associated to those `addresses` must be stored in a safe place (vault) 
-* Make sure to have a `public static ip` address for the nodes you want to share in **[Network infos](https://gitlab.com/saturnproject/externalgrp/global_qna/-/wikis/Networks-infos)** and also use the same `nodekey` file (if you've followed this readme `nodekey` file should be in `~/.keystore/nodekey` and passed to `geth` start command with `--nodekey` option) as its used to generate the `enodeId`
+* Make sure to have a `public static ip` address for the nodes you want to share in **[Network infos](https://github.com/ethereum-pocr/kerleano/wiki/Kerleano-network-infos)** and also use the same `nodekey` file (if you've followed this readme `nodekey` file should be in `~/.keystore/nodekey` and passed to `geth` start command with `--nodekey` option) as its used to generate the `enodeId`
 `enode` is `enode://${enodeId}@${public_ip_address}:30303`
 * For client nodes you can use a reverse proxy of your choice to secure the `websockets` and `rpc` endpoints with `wss` and `https`
 

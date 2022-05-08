@@ -25,40 +25,29 @@ In this example we are using 2 `ubuntu` VMs to bootstrap the network `kerleano`
 ```sh
 ssh user@VM1
 ```
- 
-**2) export gitlab user and access token with read_api scope**<br>
 
-Use gitlab personal page to create the token: https://gitlab.com/-/profile/personal_access_tokens.
-Your GITLAB_USER is the user without the @ or alternatively the name of the token you created.
+**2) download geth binary and give exec right**
 
 ```sh
-export GITLAB_USER=your_gitlab_user
-export GITLAB_ACCESS_TOKEN=your_access_token_with_read_api
-```
-
-**3) download geth binary and give exec right**
-
-```sh
-# download the latest released stable version (in this example we go for `latest`)
-export geth_version=latest && \
-    mkdir -p ~/bin && \
+# check releases here https://github.com/ethereum-pocr/go-ethereum/releases
+mkdir -p ~/bin && \
     echo "export PATH=$PATH:~/bin" >> ~/.bashrc && \
     source ~/.bashrc && \
-    curl -f -u "${GITLAB_USER}:${GITLAB_ACCESS_TOKEN}" -o "geth-pocr" \
-    https://gitlab.com/api/v4/projects/34464473/packages/generic/geth/${geth_version}/geth && \
+    curl -f -L -o "geth-pocr" \
+    https://github.com/ethereum-pocr/go-ethereum/releases/download/master/geth && \
     chmod +x geth-pocr && mv geth-pocr ~/bin/geth
 ```
 
-**4) download kerleano.json to `~/kerleano.json`**
+**3) download kerleano.json to `~/kerleano.json`**
 
 ```sh
-export kerleano_version=latest && \
-    curl -f -u "${GITLAB_USER}:${GITLAB_ACCESS_TOKEN}" -o ~/kerleano.json \
-    https://gitlab.com/api/v4/projects/34381428/packages/generic/genesis/${kerleano_version}/kerleano.json
+export kerleano_version=v1.0 && \
+    curl -f -L -o ~/kerleano.json \
+    https://github.com/ethereum-pocr/ethereum-pocr.github.io/releases/download/$kerleano_version/kerleano.json
 ```
 
 
-**5) init node with kerleano.json**
+**4) init node with kerleano.json**
 
 ```sh
 # directory where chaindata will be written, use external mount instead of ~/.ethereum/
@@ -70,7 +59,7 @@ geth init --datadir $DATADIR ~/kerleano.json
 Make sure you see `Successfully wrote genesis state` in the log of the `geth init`command, otherwise you may have some data already written that should be deleted (rm datadir `rm -rf $DATADIR`)
 
 
-**6) prepare the default public/private keys used by `kerleano`**
+**5) prepare the default public/private keys used by `kerleano`**
 
 `kerleano` network use the address `0x6e45c195e12d7fe5e02059f15d59c2c976a9b730` as default authorized wallet in the network
 
@@ -94,7 +83,7 @@ echo '{"address":"6e45c195e12d7fe5e02059f15d59c2c976a9b730","crypto":{"cipher":"
 
 ```
 
-**7) Start the first sealer of the network**
+**6) Start the first sealer of the network**
 
 ```sh
 # get public ip address
@@ -113,25 +102,25 @@ echo 'nohup geth --networkid 1804 \
     ~/start_sealer_node.sh
 ```
 
-**8) Publish the `enode` of the sealer node**
+**7) Publish the `enode` of the sealer node**
 
 ```sh
 # Get the enode of the sealer
 geth attach --datadir $DATADIR --exec admin.nodeInfo.enode
 ```
 
-then add the `enode` to this wiki page https://gitlab.com/saturnproject/externalgrp/global_qna/-/wikis/Networks-infos
+then add the `enode` to this wiki page https://github.com/ethereum-pocr/kerleano/wiki/Kerleano-network-infos
 
 # Start client node
 
 **1) configure VM2**
 
-Repeat steps from 1) to 5) used for first sealer node 
+Repeat steps from 1) to 4) used for first sealer node 
 your client node should be init with the same genesis `kerleano.json`
 
 **2) Get `kerleano` network `enodes`**
 
-Get one or more `enodes` from here https://gitlab.com/saturnproject/externalgrp/global_qna/-/wikis/Networks-infos and export in env variable BOOTNODE.
+Get one or more `enodes` from here https://github.com/ethereum-pocr/kerleano/wiki/Kerleano-network-infos and export in env variable BOOTNODE.
 will be used with `--bootnodes` option when starting the node
 
 ```sh
@@ -172,7 +161,7 @@ echo 'nohup geth --networkid 1804 \
 # Get the enode of the client
 geth attach --exec admin.nodeInfo.enode
 ```
-then add the `enode` to `enodes` list in this wiki page https://gitlab.com/saturnproject/externalgrp/global_qna/-/wikis/Networks-infos
+then add the `enode` to `enodes` list in this wiki page https://github.com/ethereum-pocr/kerleano/wiki/Kerleano-network-infos
 
 Client node expose http at port `8545` (by the option `--http.port 8545`) and websocket at `8546` (option `--ws.port 8546`)
 So update in the same wiki page add in `rpc`list with `http://$PUBLIC_IP:8545/` and websockets list with `ws://$PUBLIC_IP:8546/`
