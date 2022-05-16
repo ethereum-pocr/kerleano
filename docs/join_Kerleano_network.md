@@ -207,5 +207,45 @@ So update in the same wiki page add in `rpc`list with `http://$PUBLIC_IP:8545/` 
 you can simply edit the startup scripts `start_sealer_node.sh` and `start_client_node.sh` to add the option `--miner.extradata "The name of your node"` and give your node the name of your choice
 
 
+# Auto-refill an account from sealer node
 
+Once the sealer node get a footprint carbon set by an authrized auditor in the network, your node will start receiving `CRC` coins as rewards.
 
+You can automate sending some of those `CRC` to another `address` using this script 
+
+1. On your sealer node create the `creditWalletRefill.js`
+
+replace in the code `MIN_AMOUNT` and `TOTAL_AMOUNT` by amount you wish
+
+ if the balance of monitored address goes below `MIN_AMOUNT` the script will set the balance of the address to  `TOTAL_AMOUNT`
+
+```javascript
+function refill(target) {
+
+	if (!target || !web3.isAddress(target)) {
+		console.log("target account not specified:", target);
+		return;
+	}
+	var limit=web3.toWei(MIN_AMOUNT, "ether");
+	var total=web3.toWei(TOTAL_AMOUNT, "ether");
+	var now=new Date().toISOString();
+
+	if (eth.getBalance(target) < limit) {
+		var value = total-eth.getBalance(target);
+		var tx = eth.sendTransaction({ from: eth.coinbase, to:target, value });
+		console.log(now, "Crediting", target, "tx=", tx, "value", value);
+	} else {
+		console.log(now, "No credit");
+	}
+
+}
+```
+
+2. Edit the crontab on your sealer runner
+
+replace `TARGET_ADDRESS` by the address you want to auto-refill
+
+```sh
+# m h  dom mon dow   command
+* * * * * /chain/bin/geth attach --preload /chain/creditWalletRefill.js --exec "refill('TARGET_ADDRESS')" >> cron-refill.log 2>&1
+```
