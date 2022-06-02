@@ -8,7 +8,7 @@ For security reasons, all geth processes should be executed by a user having no 
 eventually malicious code from gaining access to the machine and manipulating account information. For this reason,
 the scripts presented here use a specific user, `kerleano_user` for all `geth` processes.
 
-## Variables 
+## Variables
 
 Variables used in the following scripts are as follows:
 
@@ -60,7 +60,7 @@ Base installation can be effected as follows. The script will generate a nodekey
 
 ## Initialize sealer account
 
-Once the base installation has been done, you're ready to generate a sealer account. 
+Once the base installation has been done, you're ready to generate a sealer account.
 
 Start by generating a password, which will be stored in a `.passphrase` file.
 Initialize the geth account with this password and extract the generated address into an `address` file.
@@ -88,16 +88,16 @@ This can be done as follows. Once the script has been executed, you should have 
       #!/bin/bash
       cd {{installation_dir}}
       bootnodes={{ enodes | join(',') }}
-      address=$(cat address) 
-      public_ip=$(curl -s ifconfig.me/ip) 
-      bin/geth --networkid 1804 --datadir .ethereum --bootnodes $bootnodes --nodekey .keystore/nodekey --syncmode full --mine --miner.gasprice 1000000000 --miner.etherbase $address --unlock $address --password .passphrase --allow-insecure-unlock --keystore .keystore --nat extip:$public_ip
+      address=$(cat address)
+      public_ip=$(curl -s ifconfig.me/ip)
+      bin/geth --networkid 1804 --datadir .ethereum --bootnodes $bootnodes --nodekey .keystore/nodekey --syncmode full --mine --miner.gasprice 1000000000 --miner.etherbase $address --unlock $address --password .passphrase --keystore .keystore --nat extip:$public_ip
 ```
 
 ### Ask for the sealer address to be added to the network or reuse an existing wallet information
 
 At this point, your sealer has an address and is ready to seal. This address will require an authorization within the network, which can be done through gitlab by creating an issue in the kerleano repo and providing reasons/motivation for wanting to join.
 
-If your sealer has already been added to the network and you wish to reuse an existing, authorized wallet, you will want to override the generated nodekey, passphrase, address and wallet info. 
+If your sealer has already been added to the network and you wish to reuse an existing, authorized wallet, you will want to override the generated nodekey, passphrase, address and wallet info.
 
 The following script can be executed to reuse an existing wallet:
 
@@ -141,9 +141,9 @@ Generating a client node startup script can be done as follows:
       #!/bin/bash
       cd {{installation_dir}}
       bootnodes={{ enodes | join(',') }}
-      address=$(cat address) 
-      public_ip=$(curl -s ifconfig.me/ip) 
-      bin/geth --networkid 1804 --datadir .ethereum --nodekey .keystore/nodekey --bootnodes $bootnodes --syncmode full               --http --http.addr=0.0.0.0 --http.port=8545 --http.api=web3,eth,net --http.corsdomain=* --http.vhosts=* --ws --ws.addr=0.0.0.0 --ws.port=8546 --ws.api=web3,eth,net --ws.origins=* --nat extip:$public_ip
+      address=$(cat address)
+      public_ip=$(curl -s ifconfig.me/ip)
+      bin/geth --networkid 1804 --datadir .ethereum --nodekey .keystore/nodekey --bootnodes $bootnodes --syncmode full --http --http.addr=0.0.0.0 --http.port=8545 --http.api=web3,eth,net --http.corsdomain=* --http.vhosts=* --ws --ws.addr=0.0.0.0 --ws.port=8546 --ws.api=web3,eth,net --ws.origins=* --nat extip:$public_ip
 ```
 
 ## Executing sealer and client nodes

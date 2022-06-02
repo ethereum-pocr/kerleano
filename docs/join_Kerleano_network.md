@@ -3,14 +3,14 @@
 We're using 2 `ubuntu` VMs to join the network `kerleano`
 
 **VM1: will be sealer in the network**
-- VM1 requirements: 
+- VM1 requirements:
     * os: Ubuntu 20.04.4 LTS
     * ram: 2Gb min
     * cpu: 1 min
     * tcp/udp port 30303: default geth node (can override by `--port` when starting the node)
 
 **VM2 : will be a client node and expose the rpc and ws endpoints of the network**
-- VM1 requirements: 
+- VM1 requirements:
     * os: Ubuntu 20.04.4 LTS
     * ram: 2Gb min
     * cpu: 1 min
@@ -38,7 +38,7 @@ mkdir -p ~/bin && \
     chmod +x geth-pocr && mv geth-pocr ~/bin/geth
 ```
 
-**3) download kerleano.json to `~/kerleano.json`** 
+**3) download kerleano.json to `~/kerleano.json`**
 
 Use same `kerleano_version` used by other nodes in the network
 ```sh
@@ -71,7 +71,7 @@ Get one or more `enodes` from here https://github.com/ethereum-pocr/kerleano/wik
 will be used with `--bootnodes` option when starting the node
 
 ```sh
-# write one or more enodes to a file 
+# write one or more enodes to a file
 echo "<enode_url_1>" >> ~/.enodes
 echo "<enode_url_xx>" >> ~/.enodes
 # export one or more enodes in the variable BOOTNODE, delimiter is comma`
@@ -113,9 +113,9 @@ echo 'nohup geth --networkid 1804 \
     --syncmode full \
     --mine --miner.gasprice 1000000000 \
     --miner.etherbase $address --unlock $address \
-    --password ~/.passphrase --allow-insecure-unlock --keystore $KEYSTORE \
+    --password ~/.passphrase --keystore $KEYSTORE \
     --nat extip:$PUBLIC_IP \
-    2>&1 1>>/tmp/eth.log &' >> ~/start_sealer_node.sh 
+    2>&1 1>>/tmp/eth.log &' >> ~/start_sealer_node.sh
 
 chmod +x ~/start_sealer_node.sh
 
@@ -157,7 +157,7 @@ clique.propose("public_address_want_to_allow", true)
 
 **1) configure VM2**
 
-Repeat steps from 1) to 5) used for first sealer node 
+Repeat steps from 1) to 5) used for first sealer node
 your client node should be init with the same genesis `kerleano.json`
 
 
@@ -180,7 +180,7 @@ echo 'nohup geth --networkid 1804 \
     --http --http.addr=0.0.0.0 --http.port=8545 --http.api=web3,eth,net --http.corsdomain=* --http.vhosts=* \
     --ws --ws.addr=0.0.0.0 --ws.port=8546 --ws.api=web3,eth,net --ws.origins=* \
     --nat extip:$PUBLIC_IP \
-    2>&1 1>>/tmp/eth.log &' >> ~/start_client_node.sh 
+    2>&1 1>>/tmp/eth.log &' >> ~/start_client_node.sh
 
 chmod +x ~/start_client_node.sh
 
@@ -205,7 +205,3 @@ So update in the same wiki page add in `rpc`list with `http://$PUBLIC_IP:8545/` 
 # Assign a name to your node (optional)
 
 you can simply edit the startup scripts `start_sealer_node.sh` and `start_client_node.sh` to add the option `--miner.extradata "The name of your node"` and give your node the name of your choice
-
-
-
-
