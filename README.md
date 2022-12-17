@@ -8,6 +8,8 @@
 
   *  Use **[Network infos](./nodes-infos.md)** to get `enodes` url, `rpc`and `websocket` endpoints to join and interact with the network
 
+  *  The RPC endpoint and Metamask connection is possible with [Chainlink](https://chainlist.org/?testnets=true&search=kerleano)
+
 # Nodes topology
 
 - **Sealer node**: is an ethereum node that will be authorized to seal blocks and get CRC as rewards once the node is given a carbon footprint by an auditor.     
