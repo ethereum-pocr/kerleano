@@ -12,7 +12,7 @@
 
 # Nodes topology
 
-- **Sealer node**: is an ethereum node that will be authorized to seal blocks and get CRC as rewards once the node is given a carbon footprint by an auditor.     
+- **Sealer node**: is an ethereum node that will be authorized to seal blocks and get CRC as rewards once the node is given an environmental footprint by an auditor.     
 The sealer node will generate an account (public and private keys) and his public address (aka wallet address) should be authorized by the other sealers of the network (using `clique.propose("address", true)` POA clique consensus).    
 The network `kerleano` is initilized with a given address `0x6e45c195e12d7fe5e02059f15d59c2c976a9b730` (the network is already initilized by tech team but you can check the steps of [How kerleano network is initilized here](docs/init_Kerleano_network.md)). 
 Once the network is set, this address will be removed (using `clique.propose("address", false)` POA clique consensus).    
