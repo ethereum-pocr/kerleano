@@ -8,7 +8,7 @@
 
   *  Use **[Network infos](./nodes-infos.md)** to get `enodes` url, `rpc`and `websocket` endpoints to join and interact with the network
 
-  *  The RPC endpoint and Metamask connection is possible with [Chainlink](https://chainlist.org/?testnets=true&search=kerleano)
+  *  The RPC endpoint and Metamask connection is possible with [Chainlist](https://chainlist.org/?testnets=true&search=kerleano)
 
 # Nodes topology
 
