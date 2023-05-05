@@ -1,8 +1,8 @@
-# Kerleano get started guide
+# Kerleano : Get Started
 
 Kerleano is the name of the test network of the Proof of Climate awaReness consensus.
 
-The following page will guide you to launch your first node, first as a client node (synchronizing and read the chain and to submit transaction) then if desired transform it into a sealer node (producing blocks). 
+The following page will guide you to launch your node, first as a client node (synchronizing and reading the chain and to submit transaction) then if desired transform it into a sealer node (producing blocks). 
 
 It is possible to run a client node quickly via a docker image. See [Quick launch](./quick-start-with-docker.md).
 
@@ -24,11 +24,11 @@ The authors of this guide takes no responsibility nor liabilities of the result 
 ## 0. Prepare the environment
 We assume that the target machine has a user (here we name it `kerleano`) 
 * Create a folder to host the environment: `mkdir ~/kerleano`
-* 
+  
 
 ## 1. Get `geth` binary
 `geth` is the binary of the Ethereum client implemented in golang.   
-For the Proof of Climate awaReness consensus, the software resides in https://github.com/ethereum-pocr/go-ethereum repository.
+For the Proof of Climate awaReness consensus, the software sources and binary resides in https://github.com/ethereum-pocr/go-ethereum repository.
 
 ### 1.1 Download from the repository (amd64 only)
 
@@ -78,7 +78,6 @@ env GO111MODULE=on go run build/ci.go install ./cmd/geth
 go: downloading github.com/cespare/cp v0.1.0
 go: downloading github.com/Azure/azure-sdk-for-go/sdk/storage/azblob v0.3.0
 go: downloading golang.org/x/crypto v0.0.0-20210921155107-089bfa567519
-go: downloading github.com/Azure/azure-sdk-for-go/sdk/azcore v0.21.1
 ....
 github.com/ethereum/go-ethereum/console
 github.com/ethereum/go-ethereum/cmd/geth
@@ -104,10 +103,10 @@ which geth # should display the ~/kerleano/bin location
 
 
 ## 2. Initialize the network data
-The client node needs 1) to initialize with a valid genesis block and 2) know a few initial live nodes to initialize the peer to peers connections
+The client node needs 1) to initialize with a valid genesis block and 2) know a few initial live nodes to initialize the peer-to-peers connections
 
 ### 2.1 Get the genesis file
-The Kerleano genesis file is stored in the [ethereum-pocr.github.io](https://github.com/ethereum-pocr/ethereum-pocr.github.io) repository where the script to produce it are.
+The Kerleano genesis file is stored in the [ethereum-pocr.github.io](https://github.com/ethereum-pocr/ethereum-pocr.github.io) repository where the script to produce it are located.
 
 ```sh
 cd ~/kerleano
@@ -136,7 +135,7 @@ cd ~/kerleano
 geth init --datadir .ethereum ./genesis.json
 ```
 Expected output:
-```javascriptread 
+```javascript
 INFO [05-05|16:21:44.875] Maximum peer count                       ETH=50 LES=0 total=50
 INFO [05-05|16:21:44.877] Smartcard socket not found, disabling    err="stat /run/pcscd/pcscd.comm: no such file or directory"
 INFO [05-05|16:21:44.880] Set global gas cap                       cap=50,000,000
@@ -156,10 +155,11 @@ INFO [05-05|16:21:44.941] Successfully wrote genesis state         database=ligh
 
 We will first start the node in pure command line then create the startup script for convenience
 ### 3.1 Manual start
-```sh
+Note that the bash shell or compatible for the `readarray` command
+```bash
 cd ~/kerleano
 BOOTNODES=$(readarray -t ARRAY < bootnodes; IFS=,; echo "${ARRAY[*]}") # convert the file into a comma separated list
-NETWORK_ID=$(grep chainId genesis.json | grep -Eo '[0-9]+') # get the value of the chain Id and use it as etwork id as well
+NETWORK_ID=$(grep chainId genesis.json | grep -Eo '[0-9]+') # get the value of the chain Id and use it as network id as well
 PUBLIC_IP=$(curl -s ifconfig.me/ip) # needed to expose your node to other, else you will not be reachable in discovery
 SYNCMODE=snap # tells to synchronize without validating the transactions (faster but imply you trust the bootnodes)
 
@@ -261,10 +261,10 @@ Add the following in `start_node.sh`, then apply executable right to it `chmod +
 You can obviously adjust the port and config as needed.
 
 ```sh
-#!/bin/sh
+#!/bin/bash
 
 BOOTNODES=$(readarray -t ARRAY < bootnodes; IFS=,; echo "${ARRAY[*]}") # convert the file into a comma separated list
-NETWORK_ID=$(grep chainId genesis.json | grep -Eo '[0-9]+') # get the value of the chain Id and use it as etwork id as well
+NETWORK_ID=$(grep chainId genesis.json | grep -Eo '[0-9]+') # get the value of the chain Id and use it as network id as well
 PUBLIC_IP=$(curl -s ifconfig.me/ip) # needed to expose your node to other, else you will not be reachable in discovery
 SYNCMODE=snap # tells to synchronize without validating the transactions (faster but imply you trust the bootnodes)
 
@@ -292,7 +292,7 @@ You can then connect your Metamask (or compatible wallet) to that node.
 
 A sealer needs to have a private key to sign the blocks. That private key is identified by its public address as `miner.etherbase` (also known as `coinbase`) and it is the wallet that will receive the block rewards and transaction fees.   
 
-A sealer node therefore keeps the wallet on its local drive (unless a remote wallet solution is setup, such as clef or hardware wallet), hence we do not want to expose the JSON Rpc endpoint to prevent the risk of anyone signing a transaction on behalf of the node.
+A sealer node therefore keeps the wallet on its local drive (unless a remote wallet solution is setup, such as `clef` or hardware wallet), hence we do not want to expose the JSON Rpc endpoint to prevent the risk of anyone signing a transaction on behalf of the node.
 
 ### 4.1 Creating the sealer etherbase wallet
 
@@ -328,7 +328,7 @@ Save the provided password into a text file so it can be used in script later: `
 #!/bin/bash
 
 BOOTNODES=$(readarray -t ARRAY < bootnodes; IFS=,; echo "${ARRAY[*]}") # convert the file into a comma separated list
-NETWORK_ID=$(grep chainId genesis.json | grep -Eo '[0-9]+') # get the value of the chain Id and use it as etwork id as well
+NETWORK_ID=$(grep chainId genesis.json | grep -Eo '[0-9]+') # get the value of the chain Id and use it as network id as well
 PUBLIC_IP=$(curl -s ifconfig.me/ip) # needed to expose your node to other, else you will not be reachable in discovery
 SYNCMODE=full # prefer a full transaction verification on sealer
 ETHERBASE=0x64d0eFdeFb40E39A5ea946A0E132Dc0b690BD2c1 # replace with the locally created wallet
@@ -354,9 +354,10 @@ geth attach .ethereum/geth.ipc
 
 ### 4.3 Request that your node participate to the Consensus
 
-To request to the community to be added as a sealer, you must [request in an issue](https://github.com/ethereum-pocr/kerleano/issues) that your sealer address (the etherbase above) is added. You must state your identity and your objectives so existing participants in the Kerleano test network can assess if they should allow you or not.
+To request the community that your sealer be added, you must [submit an issue](https://github.com/ethereum-pocr/kerleano/issues) with your sealer address (the etherbase above). You must state your identity and your objectives so existing participants in the Kerleano test network can assess if they should allow you or not.
 
-Once approved by a majority of the sealers (N/2+1 where N is the number of existing sealers). Note that for the production network the onboarding process is more restrictive and is detailled in the whitepaper.
+Once approved by a majority of the sealers (N/2+1 where N is the number of existing sealers) your node will start creating blocks.     
+Note that for the production network the onboarding process is more restrictive and is detailled in the whitepaper.
 
 Existing sealers will connect on their node and run the following command to accept your node:
 ```sh
@@ -364,12 +365,12 @@ geth attach .ethereum/geth.ipc
 > clique.propose("0x64d0eFdeFb40E39A5ea946A0E132Dc0b690BD2c1", true)
 ```
 
-### 4.4 Audit your node to get an environmental footprint
+### 4.4 Audit your node to get an environmental footprint (in testnet)
 
-Until your node has been evaluated for its environmental footprint by an independant certified auditor, your sealer will not earned any CRC despit the fact you are creating blocks and processing transactions.
+Until your node has been evaluated for its environmental footprint by an independant certified auditor, your sealer will not earn any CRC despite the fact you are creating blocks and processing transactions.
 
 So you must reach to a declared auditor. Anyone can become an auditor but it needs to pledge a certain quantity of CRC to be able to audit.
 
 To perform this audit, the auditor goes to the Governance site https://ethereum-pocr.github.io/ with metamask (or operate directly by calling the [Governance smart contracts](https://github.com/ethereum-pocr/ethereum-pocr.github.io/blob/main/sc-carbon-footprint/src/Governance.sol) )
 
-You can monitor the status of your node at the Governance site in the Dashboard publicly available.
+You can monitor the status of your node at the Governance site in the publicly available dashboard (requires metamask).
