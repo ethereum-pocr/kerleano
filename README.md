@@ -2,9 +2,9 @@
 
 # Network infos
 
-  *  Use **[Issues](https://github.com/ethereum-pocr/kerleano/issues)** to submit a request to joint kerleano network or read the existing requests.   
-      Use the Issues list also to follow instruction from the development team in case of reset of the network.   
-      **So subscribe to the issues as you need to get notified when a node need your accaptance or when the testnet needs to be reset.**
+  *  Use **[Issues](https://github.com/ethereum-pocr/kerleano/issues)** to submit a request to join kerleano network or read the existing requests.   
+      Use the Issues list also to follow instructions from the development team in case of reset of the network.   
+      **So subscribe to the issues as you need to get notified when a node need your acceptance or when the testnet needs to be reset.**
 
   *  Use **[Network infos](./nodes-infos.md)** to get `enodes` url, `rpc`and `websocket` endpoints to join and interact with the network
 
@@ -14,7 +14,7 @@
 
 - **Sealer node**: is an ethereum node that will be authorized to seal blocks and get CRC as rewards once the node is given an environmental footprint by an auditor.     
 The sealer node will generate an account (public and private keys) and his public address (aka wallet address) should be authorized by the other sealers of the network (using `clique.propose("address", true)` POA clique consensus).    
-The network `kerleano` is initilized with a given address `0x6e45c195e12d7fe5e02059f15d59c2c976a9b730` (the network is already initilized by tech team but you can check the steps of [How kerleano network is initilized here](docs/init_Kerleano_network.md)). 
+The network `kerleano` is initialized with a given address `0x6e45c195e12d7fe5e02059f15d59c2c976a9b730` (the network is already initialized by tech team but you can check the steps of [How kerleano network is initialized here](docs/init_Kerleano_network.md)). 
 Once the network is set, this address will be removed (using `clique.propose("address", false)` POA clique consensus).    
 Sealer node only exposes to the internet the Whisper (`30303` tcp/udp port) protocol to dialog in encrypted way with other nodes on the network (peers). 
 
@@ -23,7 +23,7 @@ Sealer node only exposes to the internet the Whisper (`30303` tcp/udp port) prot
 
 # Join the network
 
-If you want to join the netwok as a client or a sealer node check this doc
+If you want to join the network as a client or a sealer node check this doc
 
   * See [Join kerleano network](docs/join_Kerleano_network.md)
 
@@ -46,7 +46,7 @@ You must see this line with `Imported new chain segment` and `number=xxx` corres
 When you start a fresh node with empty datadir, you should see the `Imported new chain segment` log line from block `number=1` until the last block of the network. 
 
 
-You can check if your node still syncing and the highestBlock of the network using the commands bellow :
+You can check if your node still syncing and the highestBlock of the network using the commands below :
 
 ```sh
 # execute a javascript console to your node
