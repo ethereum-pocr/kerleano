@@ -11,7 +11,7 @@ The authors of this guide takes no responsibility nor liabilities of the result 
 
 ## Pre requisites
 * Being familiar with the Ethereum ecosystem
-* Be familiar with linux command line (if you target windows, you are expected to make the translation of the command from this guide)
+* Be familiar with linux command line (if you target windows, consult the guide [Get Started for windows](./get-started-for-windows.md) )
 * Have a computer/VM connected to internet with at least 2Go of free memory
   * Architecture can be anything (if other than `amd64` you may need to recompile the golang binary)
   * OS can be anything (but if different from linux or darwin (Mac Os) you may need to recompile the golang binary)
